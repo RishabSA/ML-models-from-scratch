@@ -53,21 +53,26 @@ $$
 The loss function helps us understand the quality of the model’s predictions. The loss refers to the error of a single observation, while the cost refers to the average error of the entire dataset. For classification tasks, we can use **Binary Cross Entropy** which is:
 
 $$
-J(\theta) = -\frac{1}{m} \sum_{i=1}^m(y^{(i)}ln(h_\sigma(x^{(i)})))+(1-y^{(i)})ln(1-(\sigma(x^{(i)})))
+J(x, y)= -\frac{1}{m} \sum_{i=1}^m(y^{(i)}ln(h_\sigma(x^{(i)})))+(1-y^{(i)})ln(1-(\sigma(x^{(i)})))
 $$
 
 Where:
 
-- $J(\theta)$ is the **cost function**
+- $J$ is the **cost function**
 - $\sigma$ represents the **hypothesis function**, which in this case is the sigmoid function. The hypothesis function is a function that produces the predicted output of the network.
 
 In the Binary Cross Entropy function, $\sigma(x)$ is the probability that the input belongs to the positive class. $1 - \sigma(x)$ is the probability that the input belongs to the negative class.
 
-The loss function of a single sample can be defined as:
+Treating A3 and y as matrices inputted in the function, we can get rid of the summation:
 
 $$
-J(A3_i, y_i) = -(y_i\cdot ln(A3_i)+(1-y_i)\cdot ln(1-A3_i))
+J(A3, y) = -\frac{1}{m}(y\cdot ln(A3)+(1-y)\cdot ln(1-A3))
 $$
+
+Where:
+
+- $A3$ is the predicted value of a sample
+- $y$ is the actual value of a sample
 
 The process of backpropagation involves taking the derivatives from the loss function with respect to the weights and biases.
 
@@ -79,10 +84,10 @@ $$
 
 ### Derivative of the Loss Function
 
-The derivative of the Binary Cross Entropy loss function is: (Remember that the derivative of $ln(x)$ is $\frac{1}{x}$
+The derivative of the Binary Cross Entropy loss function is: (Remember that the derivative of $ln(x)$ is $\frac{1}{x}$. We have to remember to divide by the number of samples.
 
 $$
-\frac{-y_i}{A3_i}+\frac{1-y_i}{1-A3_i}=\frac{A3_i-y_iA3_i-y_i+y_iA3_i}{A3_i(1-A3_i)}=\frac{A3_i-y_i}{A3_i(1-A3_i)}
+\frac{1}{m} (\frac{-y}{A3}+\frac{1-y}{1-A3})=\frac{1}{m}(\frac{A3-yA3-y+yA3}{A3(1-A3)})=\frac{1}{m}(\frac{A3-y}{A3(1-A3)})
 $$
 
 In the above, we have to remember that the value of $A3_i$ is the output of the sigmoid function. The derivative of the sigmoid function is defined as:
@@ -103,25 +108,27 @@ Looking at the derivative of the sigmoid function on a graph, it looks very simi
 
 We can replace $\sigma(z)$ with $A3$ as that is the final activation anyways. Now, we have to find the derivative of $Z3$ with respect to $W3$.
 
-Since $Z3_i = W3 \cdot A2_i + b3$, this can be viewed as a linear line, so the derivative must be the slope of the line: $A2$
+Since $Z3 = W3 \cdot A2 + b3$, this can be viewed as a linear line, so the derivative must be the slope of the line: $A2$
 
 Thus, putting each of the partial derivatives together, we get that the derivative of the Binary Cross Entropy Loss function with respect to $W3$ is:
 
 $$
-\frac{\partial J}{\partial W3}=\frac{A3_i-y_i}{A3_i(1-A3_i)}\cdot A3_i(1 - A3_i) \cdot A2
+\frac{\partial J}{\partial W3}=\frac{1}{m} \cdot \frac{A3_i-y_i}{A3_i(1-A3_i)}\cdot A3_i(1 - A3_i) \cdot A2
 $$
 
 Simplifying this, we get:
 
 $$
-\partial W3 = (A3_i-y_i)A2
+\partial W3 = \frac{A2}{m}(A3-y)
 $$
 
-We can get rid of $A2$ to get:
+We can get rid of the last part of the chained expression, which is equal to $A2$ to get:
 
 $$
-\partial Z3 = (A3_i-y_i)
+\partial Z3 = \frac{1}{m}(A3-y)
 $$
+
+We need to get this partial derivative as it is needed to calculate the gradients as we go backwards through the network.
 
 The partial derivative of a sum is the derivative of a function with respect to one of its variables while treating other variables as constants, disregarding them in differentiation. The term $b3$ would be constant, while the derivative of $Z3$ with respect to $W3$ would be the partial derivate that we are looking for.
 
@@ -134,7 +141,7 @@ $$
 The derivative of $\frac{\partial Z3}{\partial A2}$ is calculated similarly to above:
 
 $$
-Z3_i=W3 \cdot A2_i + b3
+Z3=W3 \cdot A2 + b3
 $$
 
 So the derivative term is equal to $W3$
@@ -146,15 +153,27 @@ We also have to find the derivative of the Activation Function used in the secon
 Also, the derivative of $\frac{\partial Z2}{\partial W2}$ is $A1$, since:
 
 $$
-Z2_i=W2 \cdot A1_i + b2
+Z2=W2 \cdot A1 + b2
 $$
 
-Putting each of these partial derivatives through the chained equation above, we get that $\partial W2 = \partial Z3 \cdot W3 \cdot g\prime(Z2) \cdot A1_i$
+Putting each of these partial derivatives through the chained equation above, we get that $\partial W2 = \partial Z3 \cdot W3 \cdot g\prime(Z2) \cdot A1$
 
-Removing the $A1_i$, we get that:
+Plugging in the known value of $\partial Z3$, we get that $\partial W2$ is:
+
+$$
+\partial W2 = \frac{1}{m}(A3 - y) \cdot W3 \cdot g\prime(Z2) \cdot A1
+$$
+
+Removing the last term of the chained expression, $A1$, we get that:
 
 $$
 \partial Z2 = \partial Z3 \cdot W3 \cdot g\prime(Z2)
+$$
+
+Plugging in the known value of $\partial Z3$, we get that the gradient of $\partial Z2$ is:
+
+$$
+\partial Z2 = \frac{1}{m}(A3-y) \cdot W3 \cdot g\prime(Z2)
 $$
 
 Following the same steps to calculate the derivative of $W1$, we get the chained expression:
@@ -167,10 +186,22 @@ Using the previously calculated expressions, we get that the derivative of $\fra
 
 Putting these through the chained equation, we get that $\partial W1 = \partial Z2 \cdot W2 \cdot g\prime(Z1) \cdot X$
 
-Removing the $X$, we get that:
+Substituting the known value for $\partial Z2$, we get:
+
+$$
+\partial W1 = (\frac{1}{m}(A3-y) \cdot W3 \cdot g\prime(Z2)) \cdot W2 \cdot g\prime(Z1) \cdot X
+$$
+
+Removing the last term of the chained expression, $X$, we get that:
 
 $$
 \partial Z1 = \partial Z2 \cdot W2 \cdot g\prime(Z1)
+$$
+
+Substituting the known value for $\partial Z2$, we get:
+
+$$
+\partial Z1 = (\frac{1}{m}(A3-y) \cdot W3 \cdot g\prime(Z2)) \cdot W2 \cdot g\prime(Z1)
 $$
 
 Looking back at this, we use the chain rule of partial derivatives because we are trying to find the derivative of $W3$ with respect to the loss function, but the loss function does not actually contain $W3$. So we use the chain rule to use the equation for $Z3$.
@@ -184,23 +215,22 @@ We need to save the variables for $\partial Z1$, $\partial Z2$, and $\partial Z3
 The loss function helps us understand the quality of the model’s predictions. The loss refers to the error of a single observation, while the cost refers to the average error of the entire dataset. For regression tasks, we can use **Mean Squared Error** which is:
 
 $$
-J(\theta) = \frac{1}{m} \sum_{i=1}^m \frac{1}{2}(A3_{i} - y_i)^2
+J(A3, y) = \frac{1}{m} \sum_{i=1}^m (A3_{i} - y_i)^2
 $$
 
 Where:
 
-- $J(\theta)$ is the **cost function**
+- $J$ is the **cost function**
 
-The loss function of a single sample can be defined as:
+We can get rid of the summation by treating $A3$ and $y$ as matrices:
 
 $$
-
-J(A3, y) = \frac{1}{2}(A3 - y)^2
+J(A3, y) = \frac{1}{m}(A3 - y)^2
 $$
 
 The process of backpropagation involves taking the derivatives from the loss function with respect to the weights and biases.
 
-We can follow a similar process to above. However in this case, $A_3 = Z_3$ since we are using a linear activation, so the chained expression becomes:
+We can follow a similar process to above. However in this case, $A3 = Z3$ since we are using a linear activation, so the chained expression becomes:
 
 $$
 \frac{\partial J}{\partial W3} = \frac{\partial J}{\partial Z3} \cdot \frac{\partial Z3}{\partial W3}
@@ -211,7 +241,7 @@ $$
 The derivative of the Mean Squared Error loss function with respect to $A_3$ can be easily calculated using the power rule, which is:
 
 $$
-A3-y
+\frac{2}{m}(A3-y)
 $$
 
 ### Finding Partial Derivatives
@@ -220,16 +250,16 @@ Now that we know the derivative of the loss function in terms of $A3$ (which is 
 
 Since $Z3_i = W3 \cdot A2_i + b3$, this can be viewed as a linear line, so the derivative must be the slope of the line: $A2$
 
-Thus, putting each of the partial derivatives together, we get that the derivative of the Binary Cross Entropy Loss function with respect to $W3$ is:
+Thus, putting each of the partial derivatives together, we get that the derivative of the MSE Loss function with respect to $W3$ is:
 
 $$
-\frac{\partial J}{\partial W3}=(A3 - y)\cdot A2
+\frac{\partial J}{\partial W3}=\frac{2}{m}(A3 - y)\cdot A2
 $$
 
-We can get rid of $A2$ to get:
+We can get rid of the last part of the chained expression, $A2$ to get:
 
 $$
-\partial Z3 = A3-y_i
+\partial Z3 = \frac{2}{m}(A3-y)
 $$
 
 The partial derivative of a sum is the derivative of a function with respect to one of its variables while treating other variables as constants, disregarding them in differentiation. The term $b3$ would be constant, while the derivative of $Z3$ with respect to $W3$ would be the partial derivate that we are looking for.
@@ -243,7 +273,7 @@ $$
 The derivative of $\frac{\partial Z3}{\partial A2}$ is calculated similarly to above:
 
 $$
-Z3_i=W3 \cdot A2_i + b3
+Z3=W3 \cdot A2 + b3
 $$
 
 So the derivative term is equal to $W3$
@@ -255,15 +285,27 @@ We also have to find the derivative of the Activation Function used in the secon
 Also, the derivative of $\frac{\partial Z2}{\partial W2}$ is $A1$, since:
 
 $$
-Z2_i=W2 \cdot A1_i + b2
+Z2=W2 \cdot A1 + b2
 $$
 
-Putting each of these partial derivatives through the chained equation above, we get that $\partial W2 = \partial Z3 \cdot W3 \cdot g\prime(Z2) \cdot A1_i$
+Putting each of these partial derivatives through the chained equation above, we get that $\partial W2 = \partial Z3 \cdot W3 \cdot g\prime(Z2) \cdot A1$
 
-Removing the $A1_i$, we get that:
+Plugging in the known value of $\partial Z3$, we get that $\partial W2$ is:
+
+$$
+\partial W2 = \frac{2}{m}(A3-y) \cdot W3 \cdot g\prime(Z2) \cdot A1
+$$
+
+Removing the last term of the chained expression, $A1$, we get that:
 
 $$
 \partial Z2 = \partial Z3 \cdot W3 \cdot g\prime(Z2)
+$$
+
+Plugging in the known value of $\partial Z3$, we get:
+
+$$
+\partial Z2 = \frac{2}{m}(A3-y) \cdot W3 \cdot g\prime(Z2)
 $$
 
 Following the same steps to calculate the derivative of $W1$, we get the chained expression:
@@ -276,10 +318,22 @@ Using the previously calculated expressions, we get that the derivative of $\fra
 
 Putting these through the chained equation, we get that $\partial W1 = \partial Z2 \cdot W2 \cdot g\prime(Z1) \cdot X$
 
-Removing the $X$, we get that:
+Plugging in the known value of $\partial Z2$, we get:
+
+$$
+\partial W1 = (\frac{2}{m}(A3-y) \cdot W3 \cdot g\prime(Z2)) \cdot W2 \cdot g\prime(Z1) \cdot X
+$$
+
+Removing the last term of the chained expression, $X$, we get that:
 
 $$
 \partial Z1 = \partial Z2 \cdot W2 \cdot g\prime(Z1)
+$$
+
+Plugging in the known value of $\partial Z2$, we get:
+
+$$
+\partial Z1 = (\frac{2}{m}(A3-y) \cdot W3 \cdot g\prime(Z2)) \cdot W2 \cdot g\prime(Z1)
 $$
 
 Looking back at this, we use the chain rule of partial derivatives because we are trying to find the derivative of $W3$ with respect to the loss function, but the loss function does not actually contain $W3$. So we use the chain rule to use the equation for $Z3$.
@@ -292,6 +346,10 @@ Now that we have the partial derivatives of the weights and biases for each laye
 
 $$
 W_i=W_{i-1}-(\alpha \cdot \frac{\partial J}{\partial  W_i})
+$$
+
+$$
+b_i=b_{i-1}-(\alpha \cdot \sum_{j=1}^m \partial ZI_j)
 $$
 
 This allows us to find the metaphorical “valley” or dips in the cost function in which the loss has been minimized, which is the goal of our training model.
