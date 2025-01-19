@@ -82,6 +82,8 @@ $$
 \frac{\partial J}{\partial W3} = \frac{\partial J}{\partial A3} \cdot \frac{\partial A3}{\partial Z3} \cdot \frac{\partial Z3}{\partial W3}
 $$
 
+**Notice that this chained expression works because we are multiplying the partial derivative outside of the other partial derivative. This is essentially how the chain rule would work if we were to plug in the chained expression into the equation directly.**
+
 ### Derivative of the Loss Function
 
 The derivative of the Binary Cross Entropy loss function is: (Remember that the derivative of $ln(x)$ is $\frac{1}{x}$. We have to remember to divide by the number of samples.
@@ -235,6 +237,8 @@ We can follow a similar process to above. However in this case, $A3 = Z3$ since 
 $$
 \frac{\partial J}{\partial W3} = \frac{\partial J}{\partial Z3} \cdot \frac{\partial Z3}{\partial W3}
 $$
+
+**Notice that this chained expression works because we are multiplying the partial derivative outside of the other partial derivative. This is essentially how the chain rule would work if we were to plug in the chained expression into the equation directly.**
 
 ### Derivative of the Loss Function
 
