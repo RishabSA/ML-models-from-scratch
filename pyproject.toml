@@ -1,0 +1,12 @@
+[project]
+name = "ml-models-from-scratch"
+version = "0.1.0"
+description = "Machine Learning (ML) Models from Scratch"
+readme = "README.md"
+requires-python = ">=3.13.7"
+dependencies = [
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.4",
+    "pandas>=3.0.2",
+    "scikit-learn>=1.8.0",
+]
